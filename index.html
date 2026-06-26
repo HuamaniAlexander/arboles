@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Árboles — Aprende Interactivo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161922;
+    --surface2: #1e2330;
+    --border: #2a3045;
+    --accent: #6ee7b7;
+    --accent2: #818cf8;
+    --accent3: #f472b6;
+    --accent4: #fb923c;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --node-fill: #1e2330;
+    --node-stroke: #6ee7b7;
+    --node-text: #e2e8f0;
+    --edge: #2a3045;
+    --highlight: #6ee7b7;
+    --correct: #10b981;
+    --wrong: #ef4444;
+    --warning: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  nav::-webkit-scrollbar { display: none; }
+
+  .nav-logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--accent);
+    padding: 1rem 1rem 1rem 0;
+    white-space: nowrap;
+    margin-right: 1rem;
+    border-right: 1px solid var(--border);
+  }
+
+  .nav-tab {
+    padding: 1rem 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* SECTIONS */
+  section { display: none; padding: 1.5rem 1rem; max-width: 900px; margin: 0 auto; }
+  section.active { display: block; }
+
+  h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--accent);
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .card-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent2);
+    margin-bottom: 0.8rem;
+  }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #0d0f14; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.78rem; }
+  .btn-accent2 { background: var(--accent2); color: #fff; }
+  .btn-accent3 { background: var(--accent3); color: #fff; }
+
+  /* INPUTS */
+  input[type="text"], select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.55rem 0.8rem;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus, select:focus { border-color: var(--accent); }
+  select option { background: var(--surface2); }
+
+  /* SVG TREE */
+  .tree-wrap {
+    overflow-x: auto;
+    overflow-y: auto;
+    border-radius: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    min-height: 220px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .tree-wrap svg { display: block; }
+
+  /* LEVEL INDICATOR */
+  .level-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+    flex-wrap: wrap;
+  }
+  .level-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .level-badge.l0 { border-color: var(--accent); color: var(--accent); }
+  .level-badge.l1 { border-color: var(--accent2); color: var(--accent2); }
+  .level-badge.l2 { border-color: var(--accent3); color: var(--accent3); }
+  .level-badge.l3 { border-color: var(--accent4); color: var(--accent4); }
+
+  /* QUIZ */
+  .quiz-options { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
+  .quiz-option {
+    padding: 0.45rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .quiz-option:hover { border-color: var(--accent2); }
+  .quiz-option.correct { border-color: var(--correct); background: rgba(16,185,129,0.15); color: var(--correct); }
+  .quiz-option.wrong { border-color: var(--wrong); background: rgba(239,68,68,0.15); color: var(--wrong); }
+
+  .msg {
+    font-size: 0.82rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    margin-top: 0.6rem;
+    display: none;
+  }
+  .msg.ok { background: rgba(16,185,129,0.1); color: var(--correct); border: 1px solid var(--correct); display: block; }
+  .msg.err { background: rgba(239,68,68,0.1); color: var(--wrong); border: 1px solid var(--wrong); display: block; }
+  .msg.info { background: rgba(129,140,248,0.1); color: var(--accent2); border: 1px solid var(--accent2); display: block; }
+
+  /* TRAVERSAL */
+  .traversal-seq {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+  }
+  .traversal-node {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    transition: all 0.3s;
+  }
+  .traversal-node.active {
+    background: var(--accent);
+    color: #0d0f14;
+    border-color: var(--accent);
+    transform: scale(1.1);
+  }
+  .traversal-node.visited {
+    background: var(--surface2);
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  /* INFO TAGS */
+  .tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.15rem 0.55rem;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .tag-green { background: rgba(110,231,183,0.15); color: var(--accent); border: 1px solid var(--accent); }
+  .tag-purple { background: rgba(129,140,248,0.15); color: var(--accent2); border: 1px solid var(--accent2); }
+  .tag-pink { background: rgba(244,114,182,0.15); color: var(--accent3); border: 1px solid var(--accent3); }
+  .tag-orange { background: rgba(251,146,60,0.15); color: var(--accent4); border: 1px solid var(--accent4); }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+    margin-top: 0.8rem;
+  }
+  @media(max-width:480px) { .info-grid { grid-template-columns: 1fr; } }
+
+  .info-item {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 0.7rem;
+    border: 1px solid var(--border);
+  }
+  .info-item label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+  .info-item .val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    color: var(--text);
+    font-weight: 600;
+    word-break: break-all;
+  }
+
+  /* INPUT ROW */
+  .row { display: flex; gap: 0.6rem; align-items: center; }
+  .row input { flex: 1; }
+
+  /* STEP CONTROLS */
+  .step-controls {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 0.8rem;
+  }
+  .step-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    padding: 0.4rem 0.8rem;
+    background: var(--surface2);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  /* EXPRESSION INPUT */
+  .expr-help {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* THEORY */
+  .theory-block {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 8px 8px 0;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.8rem;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: #cbd5e1;
+  }
+  .theory-block strong { color: var(--accent); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+
+  /* PATH DOTS (traversal visual) */
+  .path-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .dot-pre  { background: #6ee7b7; }
+  .dot-in   { background: #818cf8; }
+  .dot-post { background: #fb923c; }
+
+  .trav-legend {
+    display: flex; gap: 1.2rem; flex-wrap: wrap;
+    margin-bottom: 0.8rem; align-items: center;
+  }
+  .trav-legend-item {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem; font-weight: 700;
+  }
+
+  /* NODE STATE COLORS */
+  .node-seq {
+    display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem;
+  }
+  .node-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem; font-weight: 700;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    transition: all 0.25s;
+    min-width: 2rem; text-align: center;
+  }
+  .node-chip.chip-pre  { background: rgba(110,231,183,0.18); border-color:#6ee7b7; color:#6ee7b7; }
+  .node-chip.chip-in   { background: rgba(129,140,248,0.18); border-color:#818cf8; color:#818cf8; }
+  .node-chip.chip-post { background: rgba(251,146,60,0.18);  border-color:#fb923c; color:#fb923c; }
+  .node-chip.chip-active { transform: scale(1.2); box-shadow: 0 0 10px currentColor; }
+
+  /* DELETION */
+  .del-type-btn {
+    flex: 1; min-width: 130px;
+    padding: 0.8rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    text-align: center;
+  }
+  .del-type-btn:hover { border-color: var(--accent3); }
+  .del-type-btn.selected { border-color: var(--accent3); background: rgba(244,114,182,0.12); color: var(--accent3); }
+
+  .del-status {
+    font-size: 0.82rem; line-height: 1.6;
+    padding: 0.7rem 0.9rem;
+    border-radius: 8px;
+    margin-top: 0.7rem;
+  }
+  .del-status.leaf   { background: rgba(110,231,183,0.1); border:1px solid #6ee7b7; color:#6ee7b7; }
+  .del-status.parent { background: rgba(251,146,60,0.1);  border:1px solid #fb923c; color:#fb923c; }
+  .del-status.root   { background: rgba(244,114,182,0.1); border:1px solid #f472b6; color:#f472b6; }
+
+  .gap-sm { margin-bottom: 0.6rem; }
+  .gap-md { margin-bottom: 1rem; }
+  .flex-wrap { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">🌳 Árboles</div>
+  <div class="nav-tab active" onclick="showTab('teoria')">Teoría</div>
+  <div class="nav-tab" onclick="showTab('quiz')">Quiz</div>
+  <div class="nav-tab" onclick="showTab('bst')">BST</div>
+  <div class="nav-tab" onclick="showTab('recorridos')">Recorridos</div>
+  <div class="nav-tab" onclick="showTab('expresion')">Expresiones</div>
+  <div class="nav-tab" onclick="showTab('visual')">Recorrido Visual</div>
+  <div class="nav-tab" onclick="showTab('eliminacion')">Eliminación</div>
+</nav>
+
+<!-- ===== TEORIA ===== -->
+<section id="teoria" class="active">
+  <h2>Conceptos de Árboles</h2>
+  <p class="subtitle">Árbol fijo de ejemplo. Analiza sus propiedades.</p>
+
+  <div class="card">
+    <div class="card-title">Árbol de ejemplo</div>
+    <div class="level-bar" id="levelBar"></div>
+    <div class="tree-wrap" id="teoriaTree"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Propiedades del árbol</div>
+    <div class="info-grid" id="treeProps"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Analiza tu propio árbol (BST)</div>
+    <div class="row gap-sm">
+      <input type="text" id="teoriaCustomInput" placeholder="Ej: 10 5 20 3 7 15 25" onkeydown="if(event.key==='Enter')buildTeoriaCustom()">
+      <button class="btn btn-primary" onclick="buildTeoriaCustom()">Analizar</button>
+    </div>
+    <div class="expr-help">Ingresa números separados por espacios. Se genera el árbol y sus propiedades.</div>
+    <div style="display:flex; gap:0.5rem; margin-top:0.7rem; flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="setTeoriaExample('4 19 -7 69 100 11 15 6')">Ejemplo imagen</button>
+      <button class="btn btn-ghost btn-sm" onclick="setTeoriaExample('50 30 70 20 40 60 80')">Ejemplo balanceado</button>
+    </div>
+    <div id="teoriaCustomTree" class="tree-wrap" style="margin-top:0.8rem; display:none;"></div>
+    <div class="level-bar" id="teoriaCustomLevelBar" style="margin-top:0.8rem;"></div>
+    <div class="info-grid" id="teoriaCustomProps"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Definiciones clave</div>
+    <div class="theory-block"><strong>Nodo raíz:</strong> Nodo sin padre. Nivel 0.</div>
+    <div class="theory-block"><strong>Nodo hoja:</strong> Nodo sin hijos (grado 0).</div>
+    <div class="theory-block"><strong>Grado de nodo:</strong> Número de hijos que tiene.</div>
+    <div class="theory-block"><strong>Grado del árbol:</strong> Máximo grado entre todos los nodos.</div>
+    <div class="theory-block"><strong>Altura del árbol:</strong> Nivel máximo existente (raíz = nivel 0).</div>
+    <div class="theory-block"><strong>Camino de longitud k:</strong> Secuencia de k+1 nodos conectados.</div>
+    <div class="theory-block"><strong>Nodo padre:</strong> Nodo que tiene al menos un hijo.</div>
+  </div>
+</section>
+
+<!-- ===== QUIZ ===== -->
+<section id="quiz">
+  <h2>Quiz Interactivo</h2>
+  <p class="subtitle">Responde preguntas sobre el árbol. Identifica nodos y propiedades.</p>
+
+  <div class="card">
+    <div class="card-title">Árbol actual</div>
+    <div class="tree-wrap" id="quizTree"></div>
+  </div>
+
+  <div class="card" id="quizCard">
+    <div class="card-title">Pregunta <span id="qNum">1</span> / <span id="qTotal">8</span></div>
+    <div id="qText" style="margin-bottom:0.8rem; font-size:0.95rem; line-height:1.5;"></div>
+    <div class="quiz-options" id="qOptions"></div>
+    <div class="msg" id="qMsg"></div>
+    <div style="margin-top:1rem; display:flex; gap:0.6rem; flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" id="nextBtn" onclick="nextQuestion()" style="display:none;">Siguiente →</button>
+      <div class="step-label" id="scoreLabel">Puntos: 0 / 0</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BST ===== -->
+<section id="bst">
+  <h2>Árbol Binario de Búsqueda</h2>
+  <p class="subtitle">Ingresa números. Se construye el BST en tiempo real con niveles visibles.</p>
+
+  <div class="card">
+    <div class="card-title">Insertar números</div>
+    <div class="row gap-sm">
+      <input type="text" id="bstInput" placeholder="Ej: 4 19 -7 69 100 11 15 6" onkeydown="if(event.key==='Enter')insertBST()">
+      <button class="btn btn-primary" onclick="insertBST()">Construir</button>
+    </div>
+    <div class="expr-help">Separa números con espacios. Prueba: 4 19 -7 69 100 11 15 6</div>
+    <div style="display:flex; gap:0.5rem; margin-top:0.7rem; flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="bstExample()">Ejemplo imagen</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearBST()">Limpiar</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Árbol BST</div>
+    <div class="level-bar" id="bstLevelBar"></div>
+    <div class="tree-wrap" id="bstTree"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Propiedades del BST</div>
+    <div class="info-grid" id="bstProps"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Inserción paso a paso</div>
+    <div class="row gap-sm">
+      <input type="text" id="bstStep" placeholder="Número a insertar">
+      <button class="btn btn-accent2 btn-sm" onclick="stepInsert()">Insertar</button>
+    </div>
+    <div class="msg" id="bstMsg"></div>
+  </div>
+</section>
+
+<!-- ===== RECORRIDOS ===== -->
+<section id="recorridos">
+  <h2>Recorridos en Árbol Binario</h2>
+  <p class="subtitle">Pre-orden, In-orden, Post-orden. Visualiza paso a paso.</p>
+
+  <div class="card">
+    <div class="card-title">Construir árbol para recorrer</div>
+    <div class="row gap-sm">
+      <input type="text" id="travInput" placeholder="Ej: 50 30 70 20 40 60 80" onkeydown="if(event.key==='Enter')buildTravFromInput()">
+      <button class="btn btn-primary" onclick="buildTravFromInput()">Construir</button>
+    </div>
+    <div class="expr-help">Ingresa números separados por espacios. Se construye como BST.</div>
+    <div style="display:flex; gap:0.5rem; margin-top:0.7rem; flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="travExample1()">Ejemplo 1 (50 30 70…)</button>
+      <button class="btn btn-ghost btn-sm" onclick="travExample2()">Ejemplo imagen (4 19 -7…)</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Árbol para recorrer</div>
+    <div class="tree-wrap" id="travTree"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Seleccionar recorrido</div>
+    <div class="flex-wrap gap-sm">
+      <button class="btn btn-primary" onclick="startTraversal('preorder')">Pre-orden (Raíz→Izq→Der)</button>
+      <button class="btn btn-accent2" onclick="startTraversal('inorder')">In-orden (Izq→Raíz→Der)</button>
+      <button class="btn btn-accent3" onclick="startTraversal('postorder')">Post-orden (Izq→Der→Raíz)</button>
+    </div>
+  </div>
+
+  <div class="card" id="travCard" style="display:none;">
+    <div class="card-title" id="travTitle">Pre-orden</div>
+    <div class="theory-block" id="travExplain" style="margin-bottom:0.8rem;"></div>
+    <div class="traversal-seq" id="travSeq"></div>
+    <div class="step-controls">
+      <button class="btn btn-ghost btn-sm" onclick="travPrev()">← Anterior</button>
+      <div class="step-label" id="travStepLabel">Paso 0</div>
+      <button class="btn btn-ghost btn-sm" onclick="travNext()">Siguiente →</button>
+      <button class="btn btn-primary btn-sm" onclick="travAuto()">▶ Auto</button>
+    </div>
+    <div class="msg info" id="travMsg" style="display:none;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Reglas de recorridos</div>
+    <div class="theory-block"><strong>Pre-orden</strong> [Raíz → Izquierda → Derecha]: Visita la raíz primero, luego subárbol izquierdo, luego derecho. Sirve para copiar el árbol.</div>
+    <div class="theory-block"><strong>In-orden</strong> [Izquierda → Raíz → Derecha]: En un BST produce los nodos en orden ascendente. ¡El más usado para BST!</div>
+    <div class="theory-block"><strong>Post-orden</strong> [Izquierda → Derecha → Raíz]: Visita raíz al final. Sirve para eliminar el árbol o evaluar expresiones.</div>
+  </div>
+</section>
+
+<!-- ===== EXPRESION ===== -->
+<section id="expresion">
+  <h2>Árbol de Expresiones</h2>
+  <p class="subtitle">Escribe una expresión matemática. Se genera el árbol de expresión.</p>
+
+  <div class="card">
+    <div class="card-title">Expresión matemática</div>
+    <div class="row gap-sm">
+      <input type="text" id="exprInput" placeholder="Ej: (X*Y)/((A+B)*C)">
+      <button class="btn btn-primary" onclick="buildExprTree()">Generar</button>
+    </div>
+    <div class="expr-help">Operadores: + - * / ^ | Usa paréntesis para agrupar</div>
+    <div style="display:flex; gap:0.5rem; margin-top:0.7rem; flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="setExpr('(X*Y)/((A+B)*C)')">Ej. a</button>
+      <button class="btn btn-ghost btn-sm" onclick="setExpr('(X+Y)*((A-B)/(D^C))')">Ej. d</button>
+      <button class="btn btn-ghost btn-sm" onclick="setExpr('(((A-B)+C*D)/(E-E*D))^A')">Ej. f</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Árbol de expresión</div>
+    <div class="tree-wrap" id="exprTree"></div>
+  </div>
+
+  <div class="card" id="exprInfo" style="display:none;">
+    <div class="card-title">Recorridos de la expresión</div>
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Pre-fija (Prefijo)</label>
+        <div class="val" id="exprPre"></div>
+      </div>
+      <div class="info-item">
+        <label>In-fija (Infijo)</label>
+        <div class="val" id="exprIn"></div>
+      </div>
+      <div class="info-item">
+        <label>Post-fija (Postfijo)</label>
+        <div class="val" id="exprPost"></div>
+      </div>
+      <div class="info-item">
+        <label>Altura del árbol</label>
+        <div class="val" id="exprHeight"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ============================================================
+// TREE DATA STRUCTURE
+// ============================================================
+let _nodeIdCounter = 0;
+class TreeNode {
+  constructor(val) {
+    this.val = val;
+    this._id = _nodeIdCounter++;
+    this.children = [];
+    this.left = null;
+    this.right = null;
+    this.parent = null;
+  }
+}
+
+// ============================================================
+// EXAMPLE TREE (from image: A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q)
+// ============================================================
+function buildExampleTree() {
+  const nodes = {};
+  ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q'].forEach(v => nodes[v] = new TreeNode(v));
+  // A children: B C D E F G
+  nodes.A.children = [nodes.B, nodes.C, nodes.D, nodes.E, nodes.F, nodes.G];
+  nodes.B.parent = nodes.A; nodes.C.parent = nodes.A; nodes.D.parent = nodes.A;
+  nodes.E.parent = nodes.A; nodes.F.parent = nodes.A; nodes.G.parent = nodes.A;
+  // B: H I
+  nodes.B.children = [nodes.H, nodes.I];
+  nodes.H.parent = nodes.B; nodes.I.parent = nodes.B;
+  // D: J K
+  nodes.D.children = [nodes.J, nodes.K];
+  nodes.J.parent = nodes.D; nodes.K.parent = nodes.D;
+  // F: L
+  nodes.F.children = [nodes.L];
+  nodes.L.parent = nodes.F;
+  // G: M
+  nodes.G.children = [nodes.M];
+  nodes.M.parent = nodes.G;
+  // H: N O
+  nodes.H.children = [nodes.N, nodes.O];
+  nodes.N.parent = nodes.H; nodes.O.parent = nodes.H;
+  // K: P
+  nodes.K.children = [nodes.P];
+  nodes.P.parent = nodes.K;
+  // L: Q
+  nodes.L.children = [nodes.Q];
+  nodes.Q.parent = nodes.L;
+  return nodes.A;
+}
+
+// ============================================================
+// TREE ANALYSIS
+// ============================================================
+function getLevel(node, root) {
+  let level = 0;
+  let cur = node;
+  while (cur.parent) { level++; cur = cur.parent; }
+  return level;
+}
+
+function getAllNodes(root) {
+  const nodes = [];
+  const q = [root];
+  while (q.length) {
+    const n = q.shift();
+    nodes.push(n);
+    n.children.forEach(c => q.push(c));
+  }
+  return nodes;
+}
+
+function getHeight(root) {
+  if (!root || root.children.length === 0) return 0;
+  return 1 + Math.max(...root.children.map(getHeight));
+}
+
+function analyzeTree(root) {
+  const all = getAllNodes(root);
+  const parents = all.filter(n => n.children.length > 0);
+  const leaves = all.filter(n => n.children.length === 0);
+  const deg0 = leaves;
+  const deg1 = all.filter(n => n.children.length === 1);
+  const deg2 = all.filter(n => n.children.length === 2);
+  const deg3 = all.filter(n => n.children.length === 3);
+  const maxDeg = Math.max(...all.map(n => n.children.length));
+  const height = getHeight(root);
+
+  // caminos longitud 3
+  const paths3 = [];
+  function findPaths(node, path) {
+    const newPath = [...path, node.val];
+    if (newPath.length === 4) { paths3.push(newPath.join('→')); return; }
+    node.children.forEach(c => findPaths(c, newPath));
+  }
+  findPaths(root, []);
+
+  const totalChildren = all.reduce((s, n) => s + n.children.length, 0);
+
+  return { all, parents, leaves, deg0, deg1, deg2, deg3, maxDeg, height, paths3, totalChildren };
+}
+
+// ============================================================
+// SVG TREE RENDERING (general n-ary)
+// ============================================================
+const COLORS = ['#6ee7b7','#818cf8','#f472b6','#fb923c','#facc15','#38bdf8'];
+const NODE_R = 18;
+const H_GAP = 48;
+const V_GAP = 70;
+
+function layoutTree(root) {
+  // Assign x positions bottom-up
+  let counter = [0];
+  function assignX(node, depth) {
+    if (node.children.length === 0) {
+      node._x = counter[0]++;
+      node._y = depth;
+      return;
+    }
+    node.children.forEach(c => assignX(c, depth + 1));
+    node._x = (node.children[0]._x + node.children[node.children.length-1]._x) / 2;
+    node._y = depth;
+  }
+  assignX(root, 0);
+  return root;
+}
+
+function renderTree(root, containerId, highlightNode, visitedIds, highlightColor) {
+  highlightNode = highlightNode || null;
+  visitedIds = visitedIds || new Set();
+  highlightColor = highlightColor || '#6ee7b7';
+  const container = document.getElementById(containerId);
+  if (!root) { container.innerHTML = '<div style="color:var(--muted);padding:2rem;text-align:center;width:100%">Sin árbol</div>'; return; }
+
+  layoutTree(root);
+  const all = getAllNodes(root);
+  const maxX = Math.max(...all.map(n => n._x));
+  const maxY = Math.max(...all.map(n => n._y));
+
+  const W = Math.max(400, (maxX + 1) * H_GAP + 60);
+  const H = (maxY + 1) * V_GAP + 40;
+
+  const px = n => n._x * H_GAP + 30;
+  const py = n => n._y * V_GAP + 30;
+
+  let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+
+  for (let lv = 0; lv <= maxY; lv++) {
+    const y = lv * V_GAP + 10;
+    const col = COLORS[lv % COLORS.length];
+    svg += `<rect x="0" y="${y}" width="${W}" height="${V_GAP}" fill="${col}10" rx="0"/>`;
+    svg += `<text x="4" y="${y + 16}" font-size="9" fill="${col}80" font-family="JetBrains Mono, monospace">Nivel ${lv}</text>`;
+  }
+
+  all.forEach(n => {
+    n.children.forEach(c => {
+      svg += `<line x1="${px(n)}" y1="${py(n)}" x2="${px(c)}" y2="${py(c)}" stroke="#2a3045" stroke-width="2"/>`;
+    });
+  });
+
+  all.forEach(n => {
+    const lv = n._y;
+    const col = COLORS[lv % COLORS.length];
+    const isCurrent = highlightNode && n._id === highlightNode._id;
+    const isVisited = visitedIds.has(n._id);
+    const fill = isCurrent ? highlightColor : '#1e2330';
+    const stroke = isCurrent ? highlightColor : isVisited ? '#818cf8' : col;
+    const textCol = isCurrent ? '#0d0f14' : isVisited ? '#818cf8' : col;
+    const sw = isCurrent ? 3 : 2;
+    svg += `<circle cx="${px(n)}" cy="${py(n)}" r="${NODE_R}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+    svg += `<text x="${px(n)}" y="${py(n)+5}" text-anchor="middle" font-size="12" fill="${textCol}" font-family="JetBrains Mono,monospace" font-weight="600">${n.val}</text>`;
+  });
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+// ============================================================
+// BST
+// ============================================================
+class BST {
+  constructor() { this.root = null; }
+
+  insert(val) {
+    const node = new TreeNode(val);
+    if (!this.root) { this.root = node; return; }
+    let cur = this.root;
+    while (true) {
+      if (val < cur.val) {
+        if (!cur.left) { cur.left = node; node.parent = cur; node._side = 'L'; cur.children.push(node); break; }
+        cur = cur.left;
+      } else {
+        if (!cur.right) { cur.right = node; node.parent = cur; node._side = 'R'; cur.children.push(node); break; }
+        cur = cur.right;
+      }
+    }
+  }
+
+  getAll() {
+    const nodes = [];
+    const q = [this.root];
+    while (q.length) {
+      const n = q.shift();
+      if (!n) continue;
+      nodes.push(n);
+      if (n.left) q.push(n.left);
+      if (n.right) q.push(n.right);
+    }
+    return nodes;
+  }
+}
+
+let bst = new BST();
+
+function insertBST() {
+  const val = document.getElementById('bstInput').value.trim();
+  if (!val) return;
+  const nums = val.split(/\s+/).map(Number).filter(n => !isNaN(n));
+  bst = new BST();
+  nums.forEach(n => bst.insert(n));
+  renderBST();
+}
+
+function bstExample() {
+  document.getElementById('bstInput').value = '4 19 -7 69 100 11 15 6';
+  insertBST();
+}
+
+function clearBST() {
+  bst = new BST();
+  document.getElementById('bstInput').value = '';
+  document.getElementById('bstTree').innerHTML = '<div style="color:var(--muted);padding:2rem;text-align:center;width:100%">Ingresa números arriba</div>';
+  document.getElementById('bstProps').innerHTML = '';
+  document.getElementById('bstLevelBar').innerHTML = '';
+}
+
+function stepInsert() {
+  const v = parseInt(document.getElementById('bstStep').value);
+  if (isNaN(v)) { showMsg('bstMsg','err','Ingresa un número válido'); return; }
+  bst.insert(v);
+  renderBST();
+  showMsg('bstMsg','ok',`Nodo ${v} insertado correctamente`);
+  document.getElementById('bstStep').value = '';
+}
+
+function renderBST() {
+  if (!bst.root) return;
+  renderTree(bst.root, 'bstTree');
+  const all = bst.getAll();
+  const height = getHeight(bst.root);
+  const leaves = all.filter(n => n.children.length === 0);
+  const parents = all.filter(n => n.children.length > 0);
+
+  // Level bar
+  const bar = document.getElementById('bstLevelBar');
+  bar.innerHTML = '';
+  for (let i = 0; i <= height; i++) {
+    const nodesAtLevel = all.filter(n => {
+      let lv=0, cur=n;
+      while(cur.parent){lv++;cur=cur.parent;}
+      return lv===i;
+    });
+    const badge = document.createElement('span');
+    badge.className = `level-badge l${Math.min(i,3)}`;
+    badge.textContent = `Nivel ${i}: ${nodesAtLevel.map(n=>n.val).join(', ')}`;
+    bar.appendChild(badge);
+  }
+
+  const props = document.getElementById('bstProps');
+  props.innerHTML = `
+    <div class="info-item"><label>Total nodos</label><div class="val">${all.length}</div></div>
+    <div class="info-item"><label>Altura</label><div class="val">${height}</div></div>
+    <div class="info-item"><label>Nodos hoja (deg 0)</label><div class="val">${leaves.map(n=>n.val).join(', ')}</div></div>
+    <div class="info-item"><label>Nodos padres</label><div class="val">${parents.map(n=>n.val).join(', ')}</div></div>
+    <div class="info-item"><label>Raíz</label><div class="val">${bst.root.val}</div></div>
+    <div class="info-item"><label>In-orden (ascendente)</label><div class="val">${inorder(bst.root).map(n=>n.val).join(', ')}</div></div>
+  `;
+}
+
+// ============================================================
+// TRAVERSALS
+// ============================================================
+let travData = { seq: [], step: -1, timer: null };
+let travRoot = null;
+
+// These return node REFERENCES so highlight is by identity, not value
+function preorder(node, res=[]) { if(!node)return res; res.push(node); node.left&&preorder(node.left,res); node.right&&preorder(node.right,res); return res; }
+function inorder(node, res=[]) { if(!node)return res; node.left&&inorder(node.left,res); res.push(node); node.right&&inorder(node.right,res); return res; }
+function postorder(node, res=[]) { if(!node)return res; node.left&&postorder(node.left,res); node.right&&postorder(node.right,res); res.push(node); return res; }
+
+function buildTravTree() {
+  // Build default demo tree
+  const bstT = new BST();
+  [50,30,70,20,40,60,80].forEach(v=>bstT.insert(v));
+  travRoot = bstT.root;
+  renderTree(travRoot, 'travTree');
+}
+
+function buildTravFromInput() {
+  const val = document.getElementById('travInput').value.trim();
+  if (!val) return;
+  const nums = val.split(/\s+/).map(Number).filter(n => !isNaN(n));
+  if (!nums.length) return;
+  if (travData.timer) { clearInterval(travData.timer); travData.timer = null; }
+  const bstT = new BST();
+  nums.forEach(v => bstT.insert(v));
+  travRoot = bstT.root;
+  renderTree(travRoot, 'travTree');
+  // Reset traversal
+  document.getElementById('travCard').style.display = 'none';
+  travData = { seq: [], step: -1, timer: null };
+}
+
+function travExample1() {
+  document.getElementById('travInput').value = '50 30 70 20 40 60 80';
+  buildTravFromInput();
+}
+
+function travExample2() {
+  document.getElementById('travInput').value = '4 19 -7 69 100 11 15 6';
+  buildTravFromInput();
+}
+
+// ============================================================
+// TEORIA CUSTOM BST
+// ============================================================
+function setTeoriaExample(nums) {
+  document.getElementById('teoriaCustomInput').value = nums;
+  buildTeoriaCustom();
+}
+
+function buildTeoriaCustom() {
+  const val = document.getElementById('teoriaCustomInput').value.trim();
+  if (!val) return;
+  const nums = val.split(/\s+/).map(Number).filter(n => !isNaN(n));
+  if (!nums.length) return;
+  const bstC = new BST();
+  nums.forEach(v => bstC.insert(v));
+  const root = bstC.root;
+  const all = bstC.getAll();
+  const height = getHeight(root);
+  const leaves = all.filter(n => n.children.length === 0);
+  const parents = all.filter(n => n.children.length > 0);
+  const deg1 = all.filter(n => n.children.length === 1);
+  const deg2 = all.filter(n => n.children.length === 2);
+  const maxDeg = Math.max(...all.map(n => n.children.length));
+  const totalChildren = all.reduce((s,n) => s + n.children.length, 0);
+
+  // paths length 3
+  const paths3 = [];
+  function fp(node, path) {
+    const p = [...path, node.val];
+    if (p.length === 4) { paths3.push(p.join('→')); return; }
+    node.children.forEach(c => fp(c, p));
+  }
+  fp(root, []);
+
+  // show tree
+  const treeDiv = document.getElementById('teoriaCustomTree');
+  treeDiv.style.display = 'flex';
+  renderTree(root, 'teoriaCustomTree');
+
+  // level bar
+  const bar = document.getElementById('teoriaCustomLevelBar');
+  bar.innerHTML = '';
+  for (let i=0; i<=height; i++) {
+    const nodesAtLevel = all.filter(n => { let lv=0,cur=n; while(cur.parent){lv++;cur=cur.parent;} return lv===i; });
+    const badge = document.createElement('span');
+    badge.className = `level-badge l${Math.min(i,3)}`;
+    badge.textContent = `Nivel ${i}: ${nodesAtLevel.map(n=>n.val).join(', ')}`;
+    bar.appendChild(badge);
+  }
+
+  document.getElementById('teoriaCustomProps').innerHTML = `
+    <div class="info-item"><label>Nodos padres</label><div class="val">${parents.map(n=>n.val).join(', ')||'—'}</div></div>
+    <div class="info-item"><label>Nodos hoja (grado 0)</label><div class="val">${leaves.map(n=>n.val).join(', ')}</div></div>
+    <div class="info-item"><label>Altura del árbol</label><div class="val">Nivel ${height}</div></div>
+    <div class="info-item"><label>Nodos grado 1</label><div class="val">${deg1.map(n=>n.val).join(', ')||'—'}</div></div>
+    <div class="info-item"><label>Nodos grado 2</label><div class="val">${deg2.map(n=>n.val).join(', ')||'—'}</div></div>
+    <div class="info-item"><label>Grado del árbol</label><div class="val">${maxDeg}</div></div>
+    <div class="info-item"><label>Caminos longitud 3</label><div class="val">${paths3.slice(0,3).join(' | ')||'—'}</div></div>
+    <div class="info-item"><label>Total nodos hijos</label><div class="val">${totalChildren}</div></div>
+    <div class="info-item"><label>Raíz</label><div class="val">${root.val}</div></div>
+    <div class="info-item"><label>Total nodos</label><div class="val">${all.length}</div></div>
+    <div class="info-item"><label>In-orden</label><div class="val">${inorder(root).map(n=>n.val).join(', ')}</div></div>
+  `;
+}
+
+function startTraversal(type) {
+  if (travData.timer) clearInterval(travData.timer);
+  let seq, title, explain;
+  if (type==='preorder') {
+    seq = preorder(travRoot);
+    title = 'Pre-orden: Raíz → Izquierda → Derecha';
+    explain = 'Visita primero la raíz, luego recorre el subárbol izquierdo completo, luego el derecho.';
+  } else if (type==='inorder') {
+    seq = inorder(travRoot);
+    title = 'In-orden: Izquierda → Raíz → Derecha';
+    explain = 'Recorre primero el subárbol izquierdo, visita la raíz, luego el subárbol derecho. En BST produce orden ascendente.';
+  } else {
+    seq = postorder(travRoot);
+    title = 'Post-orden: Izquierda → Derecha → Raíz';
+    explain = 'Recorre primero ambos subárboles, visita la raíz al final.';
+  }
+  travData = { seq, step: -1, timer: null };
+  document.getElementById('travTitle').textContent = title;
+  document.getElementById('travExplain').textContent = explain;
+  document.getElementById('travCard').style.display = 'block';
+  document.getElementById('travMsg').style.display = 'none';
+  renderTravSeq();
+  renderTree(travRoot, 'travTree');
+}
+
+function renderTravSeq() {
+  const el = document.getElementById('travSeq');
+  // seq is array of node refs; show val for display
+  el.innerHTML = travData.seq.map((node, i) => {
+    let cls = 'traversal-node';
+    if (i === travData.step) cls += ' active';
+    else if (i < travData.step) cls += ' visited';
+    return `<div class="${cls}">${node.val}</div>`;
+  }).join('');
+  document.getElementById('travStepLabel').textContent = `Paso ${travData.step+1} / ${travData.seq.length}`;
+
+  // Highlight current node by identity; visited = set of _id already passed
+  const currentNode = travData.step >= 0 ? travData.seq[travData.step] : null;
+  const visitedIds = new Set(travData.seq.slice(0, travData.step).map(n => n._id));
+  renderTree(travRoot, 'travTree', currentNode, visitedIds);
+}
+
+function travNext() {
+  if (travData.step < travData.seq.length - 1) { travData.step++; renderTravSeq(); }
+  if (travData.step === travData.seq.length - 1) {
+    const msg = document.getElementById('travMsg');
+    msg.textContent = `✓ Recorrido completo: ${travData.seq.map(n=>n.val).join(' → ')}`;
+    msg.style.display = 'block';
+  }
+}
+function travPrev() { if (travData.step > -1) { travData.step--; renderTravSeq(); document.getElementById('travMsg').style.display='none'; } }
+function travAuto() {
+  if (travData.timer) { clearInterval(travData.timer); travData.timer=null; return; }
+  travData.timer = setInterval(() => {
+    if (travData.step < travData.seq.length-1) { travNext(); }
+    else { clearInterval(travData.timer); travData.timer=null; }
+  }, 700);
+}
+
+// ============================================================
+// EXPRESSION TREE
+// ============================================================
+function setExpr(e) {
+  document.getElementById('exprInput').value = e;
+  buildExprTree();
+}
+
+// Simple expression parser → AST
+class ExprParser {
+  constructor(expr) {
+    this.tokens = this.tokenize(expr);
+    this.pos = 0;
+  }
+  tokenize(expr) {
+    const tokens = [];
+    let i = 0;
+    while (i < expr.length) {
+      if (/\s/.test(expr[i])) { i++; continue; }
+      if (/[a-zA-Z0-9]/.test(expr[i])) {
+        let t = '';
+        while (i < expr.length && /[a-zA-Z0-9]/.test(expr[i])) t += expr[i++];
+        tokens.push(t);
+      } else {
+        tokens.push(expr[i++]);
+      }
+    }
+    return tokens;
+  }
+  peek() { return this.tokens[this.pos]; }
+  consume() { return this.tokens[this.pos++]; }
+
+  parse() { return this.parseExpr(0); }
+
+  parseExpr(minPrec) {
+    let left = this.parseUnary();
+    while (this.pos < this.tokens.length) {
+      const op = this.peek();
+      const prec = this.opPrec(op);
+      if (prec === null || prec < minPrec) break;
+      this.consume();
+      const right = this.parseExpr(prec + 1);
+      const node = new TreeNode(op);
+      node.left = left; node.right = right;
+      node.children = [left, right];
+      left.parent = node; right.parent = node;
+      left = node;
+    }
+    return left;
+  }
+
+  opPrec(op) {
+    if (op==='+' || op==='-') return 1;
+    if (op==='*' || op==='/') return 2;
+    if (op==='^') return 3;
+    return null;
+  }
+
+  parseUnary() {
+    if (this.peek() === '(') {
+      this.consume(); // (
+      const node = this.parseExpr(0);
+      this.consume(); // )
+      return node;
+    }
+    const tok = this.consume();
+    return new TreeNode(tok);
+  }
+}
+
+function buildExprTree() {
+  const expr = document.getElementById('exprInput').value.trim();
+  if (!expr) return;
+  try {
+    const parser = new ExprParser(expr);
+    const root = parser.parse();
+    renderTree(root, 'exprTree');
+    
+    // Compute traversals
+    const pre = exprPreorder(root);
+    const ino = exprInorder(root);
+    const post = exprPostorder(root);
+    const h = getHeight(root);
+
+    document.getElementById('exprPre').textContent = pre;
+    document.getElementById('exprIn').textContent = ino;
+    document.getElementById('exprPost').textContent = post;
+    document.getElementById('exprHeight').textContent = h;
+    document.getElementById('exprInfo').style.display = 'block';
+  } catch(e) {
+    document.getElementById('exprTree').innerHTML = '<div style="color:var(--wrong);padding:1rem;">Error al parsear la expresión. Revisa la sintaxis.</div>';
+  }
+}
+
+function exprPreorder(n) { if(!n)return ''; const l=exprPreorder(n.left), r=exprPreorder(n.right); return [n.val, l, r].filter(Boolean).join(' '); }
+function exprInorder(n) { if(!n)return ''; const l=exprInorder(n.left), r=exprInorder(n.right); if(n.left||n.right) return `(${[l, n.val, r].filter(Boolean).join(' ')})`; return n.val; }
+function exprPostorder(n) { if(!n)return ''; const l=exprPostorder(n.left), r=exprPostorder(n.right); return [l, r, n.val].filter(Boolean).join(' '); }
+
+// ============================================================
+// TEORIA SECTION
+// ============================================================
+function initTeoria() {
+  const root = buildExampleTree();
+  const stats = analyzeTree(root);
+
+  renderTree(root, 'teoriaTree');
+
+  // Level bar
+  const bar = document.getElementById('levelBar');
+  bar.innerHTML = '';
+  for (let i=0; i<=stats.height; i++) {
+    const nodesAtLevel = stats.all.filter(n => getLevel(n) === i);
+    const badge = document.createElement('span');
+    badge.className = `level-badge l${Math.min(i,3)}`;
+    badge.textContent = `Nivel ${i}: ${nodesAtLevel.map(n=>n.val).join(' ')}`;
+    bar.appendChild(badge);
+  }
+
+  // Props
+  const paths3Show = stats.paths3.slice(0,3);
+  document.getElementById('treeProps').innerHTML = `
+    <div class="info-item"><label>Nodos padres</label><div class="val">${stats.parents.map(n=>n.val).join(', ')}</div></div>
+    <div class="info-item"><label>Nodos hoja (grado 0)</label><div class="val">${stats.leaves.map(n=>n.val).join(', ')}</div></div>
+    <div class="info-item"><label>Altura del árbol</label><div class="val">Nivel ${stats.height}</div></div>
+    <div class="info-item"><label>Nodos grado 0</label><div class="val">${stats.deg0.map(n=>n.val).join(', ')}</div></div>
+    <div class="info-item"><label>Nodos grado 1</label><div class="val">${stats.deg1.map(n=>n.val).join(', ')}</div></div>
+    <div class="info-item"><label>Grado del árbol</label><div class="val">${stats.maxDeg}</div></div>
+    <div class="info-item"><label>Caminos longitud 3 (2 ejemplos)</label><div class="val">${paths3Show.join(' | ')}</div></div>
+    <div class="info-item"><label>Nodos grado 3 (6 hijos = grado máx)</label><div class="val">${stats.all.filter(n=>n.children.length>=3).map(n=>n.val).join(', ')||'—'}</div></div>
+    <div class="info-item"><label>Total nodos hijos</label><div class="val">${stats.totalChildren}</div></div>
+    <div class="info-item"><label>Total nodos</label><div class="val">${stats.all.length}</div></div>
+  `;
+}
+
+// ============================================================
+// QUIZ
+// ============================================================
+let quizRoot, quizStats, qIndex=0, qScore=0;
+const questions = [
+  { q: '¿Cuál es el nodo raíz del árbol?', ans: 'A', opts: ['A','B','H','N'] },
+  { q: '¿Cuáles son los nodos hoja (sin hijos)?', ans: 'C, E, I, J, M, N, O, P, Q', opts: ['C, E, I, J, M, N, O, P, Q','A, B, D, F, G','H, K, L','B, C, D'] },
+  { q: '¿Cuál es la altura del árbol?', ans: '3', opts: ['2','3','4','5'] },
+  { q: '¿Cuántos hijos tiene el nodo A?', ans: '6', opts: ['3','4','5','6'] },
+  { q: '¿Cuál es el nodo padre de H?', ans: 'B', opts: ['A','B','D','F'] },
+  { q: '¿Cuál es el grado del árbol?', ans: '6', opts: ['2','3','4','6'] },
+  { q: '¿En qué nivel está el nodo N?', ans: 'Nivel 3', opts: ['Nivel 1','Nivel 2','Nivel 3','Nivel 4'] },
+  { q: '¿Cuántos nodos están en el nivel 2?', ans: '6 (H, I, J, K, L, M)', opts: ['4 (H, I, J, K)','5 (H, I, J, K, L)','6 (H, I, J, K, L, M)','7 (H, I, J, K, L, M, N)'] },
+];
+
+function initQuiz() {
+  quizRoot = buildExampleTree();
+  quizStats = analyzeTree(quizRoot);
+  renderTree(quizRoot, 'quizTree');
+  qIndex = 0; qScore = 0;
+  document.getElementById('qTotal').textContent = questions.length;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (qIndex >= questions.length) {
+    document.getElementById('qText').textContent = `¡Quiz terminado! Puntaje: ${qScore} / ${questions.length}`;
+    document.getElementById('qOptions').innerHTML = '';
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('qMsg').className = 'msg ok';
+    document.getElementById('qMsg').textContent = qScore===questions.length ? '¡Perfecto! 🎉' : `Bien hecho. Revisa los errores para mejorar.`;
+    return;
+  }
+  const q = questions[qIndex];
+  document.getElementById('qNum').textContent = qIndex+1;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('qMsg').className = 'msg';
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('scoreLabel').textContent = `Puntos: ${qScore} / ${qIndex}`;
+
+  const opts = document.getElementById('qOptions');
+  opts.innerHTML = '';
+  // Shuffle
+  const shuffled = [...q.opts].sort(()=>Math.random()-0.5);
+  shuffled.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = opt;
+    btn.onclick = () => answerQuiz(opt, q.ans, opts);
+    opts.appendChild(btn);
+  });
+}
+
+function answerQuiz(chosen, correct, opts) {
+  Array.from(opts.children).forEach(b => {
+    b.onclick = null;
+    if (b.textContent === correct) b.classList.add('correct');
+    else if (b.textContent === chosen) b.classList.add('wrong');
+  });
+  const msg = document.getElementById('qMsg');
+  if (chosen === correct) {
+    qScore++;
+    msg.className = 'msg ok'; msg.textContent = '✓ ¡Correcto!';
+  } else {
+    msg.className = 'msg err'; msg.textContent = `✗ Incorrecto. La respuesta es: ${correct}`;
+  }
+  document.getElementById('nextBtn').style.display = 'inline-flex';
+  document.getElementById('scoreLabel').textContent = `Puntos: ${qScore} / ${qIndex+1}`;
+}
+
+function nextQuestion() { qIndex++; renderQuestion(); }
+
+
+// ============================================================
+// RECORRIDO VISUAL — 3 PUNTOS POR NODO, MODO INDEPENDIENTE
+// ============================================================
+let visRoot = null;
+let visMode = null;       // 'pre' | 'in' | 'post'
+let visSteps = [];        // array of node refs in current mode order
+let visStep = -1;
+let visTimer = null;
+
+const VIS_NR  = 22;
+const VIS_HG  = 72;
+const VIS_VG  = 90;
+const DOT_R   = 6;
+const DOT_OX  = 14;   // horizontal offset for left/right dots
+const DOT_OY  = 4;    // vertical offset for side dots (below center)
+
+function buildImageLetterTree() {
+  const mk = v => new TreeNode(v);
+  const A=mk('A'),B=mk('B'),C=mk('C'),D=mk('D'),E=mk('E');
+  const F=mk('F'),G=mk('G'),H=mk('H'),I=mk('I'),J=mk('J');
+  A.left=B; A.right=C; B.parent=A; C.parent=A; A.children=[B,C];
+  B.left=D; B.right=E; D.parent=B; E.parent=B; B.children=[D,E];
+  D.left=H; D.right=I; H.parent=D; I.parent=D; D.children=[H,I];
+  C.left=F; C.right=G; F.parent=C; G.parent=C; C.children=[F,G];
+  G.right=J; J.parent=G; G.children=[J];
+  return A;
+}
+
+function visLoadImage() {
+  document.getElementById('visInput').value = 'A B C D E F G H I J';
+  visRoot = buildImageLetterTree();
+  visAfterLoad();
+}
+function visLoadNum(nums) {
+  document.getElementById('visInput').value = nums;
+  const b = new BST();
+  nums.split(/\s+/).map(Number).filter(n=>!isNaN(n)).forEach(v=>b.insert(v));
+  visRoot = b.root;
+  visAfterLoad();
+}
+function buildVisTree() {
+  const val = document.getElementById('visInput').value.trim();
+  if (!val) return;
+  const nums = val.split(/\s+/).map(Number).filter(n=>!isNaN(n));
+  if (!nums.length) return;
+  const b = new BST();
+  nums.forEach(v=>b.insert(v));
+  visRoot = b.root;
+  visAfterLoad();
+}
+function visAfterLoad() {
+  if (!visRoot) return;
+  visMode = null; visStep = -1; visSteps = [];
+  if (visTimer) { clearInterval(visTimer); visTimer=null; }
+  document.getElementById('visModePicker').style.display = 'block';
+  document.getElementById('visAnimCard').style.display   = 'none';
+  // Reset button styles
+  ['btnPre','btnIn','btnPost'].forEach(id => {
+    document.getElementById(id).style.opacity = '1';
+  });
+}
+
+function visModeSelect(mode) {
+  visMode = mode;
+  visStep = -1;
+  if (visTimer) { clearInterval(visTimer); visTimer=null; document.getElementById('visAutoBtn').textContent='▶ Auto'; }
+
+  if (mode === 'pre')  visSteps = preorder(visRoot);
+  if (mode === 'in')   visSteps = inorder(visRoot);
+  if (mode === 'post') visSteps = postorder(visRoot);
+
+  const titles = { pre:'🟢 PRE-ORDEN — Raíz → Izquierda → Derecha', in:'🟣 IN-ORDEN — Izquierda → Raíz → Derecha', post:'🟠 POST-ORDEN — Izquierda → Derecha → Raíz' };
+  document.getElementById('visAnimTitle').textContent = titles[mode];
+  const seqLabels = { pre:'Secuencia PRE-ORDEN (verde)', in:'Secuencia IN-ORDEN (morado)', post:'Secuencia POST-ORDEN (naranja)' };
+  document.getElementById('visSeqLabel').textContent = seqLabels[mode];
+  document.getElementById('visMsg').style.display = 'none';
+  document.getElementById('visAnimCard').style.display = 'block';
+
+  // Highlight selected button
+  const cols = { pre:'#6ee7b7', in:'#818cf8', post:'#fb923c' };
+  ['pre','in','post'].forEach(m => {
+    const btn = document.getElementById('btn'+m.charAt(0).toUpperCase()+m.slice(1));
+    btn.style.opacity = m === mode ? '1' : '0.35';
+    btn.style.borderWidth = m === mode ? '3px' : '2px';
+  });
+
+  renderVisFull();
+}
+
+// ── Layout helpers ──
+function visLayout(root) {
+  let ctr = 0;
+  function go(node, depth) {
+    if (!node.left && !node.right) { node._x = ctr++; node._y = depth; return; }
+    if (node.left)  go(node.left,  depth+1);
+    if (node.right) go(node.right, depth+1);
+    const lx = node.left  ? node.left._x  : node.right._x;
+    const rx = node.right ? node.right._x : node.left._x;
+    node._x = (lx + rx) / 2;
+    node._y = depth;
+  }
+  go(root, 0);
+}
+function vx(n) { return n._x * VIS_HG + 50; }
+function vy(n) { return n._y * VIS_VG + 50; }
+function dotPos(node, type) {
+  const cx = vx(node), cy = vy(node);
+  if (type === 'pre')  return [cx - DOT_OX, cy + DOT_OY];
+  if (type === 'in')   return [cx,           cy + VIS_NR + 6];
+  if (type === 'post') return [cx + DOT_OX,  cy + DOT_OY];
+}
+
+// ── Main render ──
+function renderVisFull() {
+  if (!visRoot || !visMode) return;
+  visLayout(visRoot);
+  const allNodes = getAllNodes(visRoot);
+  const maxX = Math.max(...allNodes.map(n=>n._x));
+  const maxY = Math.max(...allNodes.map(n=>n._y));
+  const W = Math.max(380, (maxX+1)*VIS_HG + 100);
+  const H = (maxY+1)*VIS_VG + 80;
+
+  const modeColor = visMode==='pre' ? '#6ee7b7' : visMode==='in' ? '#818cf8' : '#fb923c';
+  const dimColor  = '#2a3045';
+  const LEVEL_COLS = ['#6ee7b7','#818cf8','#f472b6','#fb923c','#facc15','#38bdf8'];
+
+  // Which nodes have been visited so far
+  const visitedIds = new Set(visSteps.slice(0, Math.max(0, visStep)).map(n=>n._id));
+  const currentNode = visStep >= 0 ? visSteps[visStep] : null;
+
+  let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+
+  // Level stripes
+  for (let lv=0; lv<=maxY; lv++) {
+    const y = lv*VIS_VG+10;
+    const col = LEVEL_COLS[lv%LEVEL_COLS.length];
+    svg += `<rect x="0" y="${y}" width="${W}" height="${VIS_VG}" fill="${col}0d"/>`;
+    svg += `<text x="4" y="${y+14}" font-size="9" fill="${col}55" font-family="JetBrains Mono,monospace">Nivel ${lv}</text>`;
+  }
+
+  // Arrow marker
+  svg += `<defs><marker id="vis-arr" markerWidth="8" markerHeight="8" refX="4" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L7,3 z" fill="${modeColor}90"/>
+  </marker></defs>`;
+
+  // Path: connect dots in order up to current step
+  if (visStep >= 1) {
+    let d = '';
+    for (let i=0; i<=visStep; i++) {
+      const node = visSteps[i];
+      // Each step corresponds to touching the "active" dot of that node in this mode
+      const [dx, dy] = dotPos(node, visMode);
+      if (i===0) d += `M${dx},${dy}`;
+      else {
+        const [px2, py2] = dotPos(visSteps[i-1], visMode);
+        const mx = (px2+dx)/2, my = Math.min(py2,dy) - 18;
+        d += ` Q${mx},${my} ${dx},${dy}`;
+      }
+    }
+    svg += `<path d="${d}" fill="none" stroke="${modeColor}60" stroke-width="2.5" stroke-dasharray="6,3" marker-end="url(#vis-arr)"/>`;
+  }
+
+  // Edges
+  allNodes.forEach(n => {
+    if (n.left)  svg += `<line x1="${vx(n)}" y1="${vy(n)}" x2="${vx(n.left)}"  y2="${vy(n.left)}"  stroke="#2a3045" stroke-width="2"/>`;
+    if (n.right) svg += `<line x1="${vx(n)}" y1="${vy(n)}" x2="${vx(n.right)}" y2="${vy(n.right)}" stroke="#2a3045" stroke-width="2"/>`;
+  });
+
+  // Nodes + dots
+  allNodes.forEach(n => {
+    const lv = n._y;
+    const nodeColor = LEVEL_COLS[lv%LEVEL_COLS.length];
+    const isCur    = currentNode && n._id === currentNode._id;
+    const isVisited = visitedIds.has(n._id);
+
+    // Node circle
+    const nodeFill   = isCur ? modeColor+'30' : '#1e2330';
+    const nodeStroke = isCur ? modeColor : isVisited ? modeColor+'70' : '#2a3045';
+    const nodeSW     = isCur ? 3 : 2;
+    const textCol    = isCur ? modeColor : isVisited ? modeColor+'aa' : nodeColor;
+    svg += `<circle cx="${vx(n)}" cy="${vy(n)}" r="${VIS_NR}" fill="${nodeFill}" stroke="${nodeStroke}" stroke-width="${nodeSW}"/>`;
+    svg += `<text x="${vx(n)}" y="${vy(n)+5}" text-anchor="middle" font-size="13" fill="${textCol}" font-family="JetBrains Mono,monospace" font-weight="700">${n.val}</text>`;
+
+    // 3 dots — only the active dot for this mode is colored when visited
+    ['pre','in','post'].forEach(type => {
+      const [dx, dy] = dotPos(n, type);
+      const isActiveDot  = type === visMode;
+      const isLitDot     = isActiveDot && (visitedIds.has(n._id) || isCur);
+      const isCurDot     = isActiveDot && isCur;
+      const dotColor     = { pre:'#6ee7b7', in:'#818cf8', post:'#fb923c' }[type];
+      const fill  = isLitDot ? dotColor : dimColor;
+      const r     = isCurDot ? DOT_R+3 : DOT_R;
+      svg += `<circle cx="${dx}" cy="${dy}" r="${r}" fill="${fill}" stroke="${isCurDot ? dotColor : 'none'}" stroke-width="${isCurDot?2:0}"/>`;
+      if (isCurDot) {
+        // Pulse ring
+        svg += `<circle cx="${dx}" cy="${dy}" r="${r+6}" fill="none" stroke="${dotColor}55" stroke-width="2"/>`;
+      }
+    });
+  });
+
+  // Traveler dot on top of current active dot
+  if (currentNode && visStep >= 0) {
+    const [tx, ty] = dotPos(currentNode, visMode);
+    svg += `<circle cx="${tx}" cy="${ty}" r="5" fill="white" stroke="${modeColor}" stroke-width="3"/>`;
+  }
+
+  svg += '</svg>';
+  document.getElementById('visTree').innerHTML = svg;
+
+  // Step label
+  document.getElementById('visStepLabel').textContent =
+    visStep < 0 ? '— pulsa Siguiente para comenzar —'
+    : `Paso ${visStep+1} / ${visSteps.length}`;
+
+  // Explanation
+  const exp = document.getElementById('visCurrentExplain');
+  if (currentNode) {
+    const typeLabels = {
+      pre:  `🟢 PRE: toco el punto IZQUIERDO del nodo [${currentNode.val}] → lo anoto en la secuencia`,
+      in:   `🟣 IN: toco el punto INFERIOR del nodo [${currentNode.val}] → lo anoto en la secuencia`,
+      post: `🟠 POST: toco el punto DERECHO del nodo [${currentNode.val}] → lo anoto en la secuencia`
+    };
+    exp.textContent = typeLabels[visMode];
+  } else {
+    const modeNames = { pre:'PRE-ORDEN (Raíz→Izq→Der)', in:'IN-ORDEN (Izq→Raíz→Der)', post:'POST-ORDEN (Izq→Der→Raíz)' };
+    exp.textContent = `Modo: ${modeNames[visMode]} — Pulsa Siguiente para ver el recorrido paso a paso`;
+  }
+
+  // Sequence chips
+  const modeClass = { pre:'chip-pre', in:'chip-in', post:'chip-post' }[visMode];
+  document.getElementById('visSeq').innerHTML = visSteps.map((node, i) => {
+    const done = i < visStep;
+    const cur  = i === visStep;
+    let cls = 'node-chip';
+    if (cur)  cls += ` ${modeClass} chip-active`;
+    else if (done) cls += ` ${modeClass}`;
+    return `<div class="${cls}">${node.val}</div>`;
+  }).join('');
+}
+
+function visNext() {
+  if (visStep < visSteps.length-1) { visStep++; renderVisFull(); }
+  if (visStep === visSteps.length-1) {
+    const modeNames = { pre:'PRE-ORDEN', in:'IN-ORDEN', post:'POST-ORDEN' };
+    const msg = document.getElementById('visMsg');
+    msg.textContent = `✓ ${modeNames[visMode]} completo: ${visSteps.map(n=>n.val).join(' → ')}`;
+    msg.style.display = 'block';
+  }
+}
+function visPrev() {
+  if (visStep > -1) { visStep--; renderVisFull(); document.getElementById('visMsg').style.display='none'; }
+}
+function visReset() {
+  visStep = -1;
+  if (visTimer) { clearInterval(visTimer); visTimer=null; document.getElementById('visAutoBtn').textContent='▶ Auto'; }
+  renderVisFull();
+  document.getElementById('visMsg').style.display='none';
+}
+function visAuto() {
+  if (visTimer) {
+    clearInterval(visTimer); visTimer=null;
+    document.getElementById('visAutoBtn').textContent='▶ Auto'; return;
+  }
+  document.getElementById('visAutoBtn').textContent='⏸ Pausa';
+  visTimer = setInterval(() => {
+    if (visStep < visSteps.length-1) { visNext(); }
+    else { clearInterval(visTimer); visTimer=null; document.getElementById('visAutoBtn').textContent='▶ Auto'; }
+  }, 700);
+}
+// ============================================================
+// ELIMINACIÓN BST
+// ============================================================
+let delBST = null;
+
+function delExample(nums) {
+  document.getElementById('delInput').value = nums;
+  buildDelTree();
+}
+
+function buildDelTree() {
+  const val = document.getElementById('delInput').value.trim();
+  if (!val) return;
+  const nums = val.split(/\s+/).map(Number).filter(n=>!isNaN(n));
+  if (!nums.length) return;
+  delBST = new BST();
+  nums.forEach(v=>delBST.insert(v));
+  renderTree(delBST.root, 'delTree');
+  document.getElementById('delControlCard').style.display = 'block';
+  document.getElementById('delStatus').style.display = 'none';
+}
+
+function deleteNode() {
+  const val = parseInt(document.getElementById('delNodeInput').value);
+  if (isNaN(val) || !delBST || !delBST.root) { return; }
+
+  const result = bstDelete(delBST, val);
+  const statusEl = document.getElementById('delStatus');
+  statusEl.style.display = 'block';
+
+  if (!result.found) {
+    statusEl.className = 'del-status parent';
+    statusEl.textContent = `⚠ Nodo ${val} no encontrado en el árbol.`;
+    return;
+  }
+
+  renderTree(delBST.root || null, 'delTree');
+  statusEl.className = 'del-status ' + result.caseType;
+  statusEl.textContent = result.msg;
+  document.getElementById('delNodeInput').value = '';
+}
+
+function bstDelete(bst, val) {
+  // Find node
+  let node = bst.root;
+  while (node && node.val !== val) {
+    node = val < node.val ? node.left : node.right;
+  }
+  if (!node) return { found: false };
+
+  const childCount = (node.left?1:0) + (node.right?1:0);
+  let caseType, msg;
+
+  if (childCount === 0) {
+    // CASE 1: leaf
+    caseType = 'leaf';
+    msg = `✓ CASO 1 — Hoja eliminada: [${val}] no tenía hijos. Se eliminó directamente. El padre ya no apunta a él.`;
+    removeLeaf(bst, node);
+  } else if (childCount === 1) {
+    // CASE 2: one child
+    caseType = 'parent';
+    const child = node.left || node.right;
+    msg = `✓ CASO 2 — Un hijo: [${val}] tenía 1 hijo [${child.val}]. El hijo sube a ocupar su lugar.`;
+    removeOneChild(bst, node);
+  } else {
+    // CASE 3: two children — find in-order successor (min of right subtree)
+    let successor = node.right;
+    while (successor.left) successor = successor.left;
+    const succVal = successor.val;
+    caseType = 'root';
+    if (!node.parent) {
+      msg = `✓ CASO 3b — Raíz con 2 hijos: Se buscó el sucesor in-orden [${succVal}] (mínimo del subárbol derecho). La raíz tomó ese valor y se eliminó el sucesor.`;
+    } else {
+      msg = `✓ CASO 3 — 2 hijos: [${val}] tenía 2 hijos. Sucesor in-orden = [${succVal}] (mínimo del subárbol derecho). Se copió [${succVal}] al nodo y se eliminó el sucesor.`;
+    }
+    // Copy successor value
+    node.val = succVal;
+    // Delete successor (it has 0 or 1 child — right only)
+    const succChildren = (successor.left?1:0)+(successor.right?1:0);
+    if (succChildren === 0) removeLeaf(bst, successor);
+    else removeOneChild(bst, successor);
+  }
+
+  return { found: true, caseType, msg };
+}
+
+function removeLeaf(bst, node) {
+  if (!node.parent) { bst.root = null; return; }
+  const p = node.parent;
+  if (p.left === node) { p.left = null; p.children = p.children.filter(c=>c!==node); }
+  else { p.right = null; p.children = p.children.filter(c=>c!==node); }
+}
+
+function removeOneChild(bst, node) {
+  const child = node.left || node.right;
+  child.parent = node.parent;
+  if (!node.parent) { bst.root = child; return; }
+  const p = node.parent;
+  if (p.left === node) { p.left = child; }
+  else { p.right = child; }
+  p.children = p.children.map(c => c===node ? child : c);
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function showMsg(id, type, text) {
+  const el = document.getElementById(id);
+  el.className = `msg ${type}`; el.textContent = text;
+}
+
+function getLevel(node) {
+  let lv=0, cur=node;
+  while(cur.parent){lv++;cur=cur.parent;}
+  return lv;
+}
+
+// ============================================================
+// TAB NAVIGATION
+// ============================================================
+function showTab(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+initTeoria();
+initQuiz();
+buildTravTree();
+// Default expression
+document.getElementById('exprInput').value = '(X*Y)/((A+B)*C)';
+buildExprTree();
+</script>
+
+<!-- ===== RECORRIDO VISUAL ===== -->
+<section id="visual">
+  <h2>Recorrido Visual — Técnica de los 3 Puntos</h2>
+  <p class="subtitle">Cada nodo tiene 3 puntos: izquierda (PRE), centro (IN), derecha (POST). Elige un recorrido y la flecha te muestra el camino del contorno.</p>
+
+  <div class="card">
+    <div class="card-title">Construir árbol</div>
+    <div class="row gap-sm">
+      <input type="text" id="visInput" placeholder="Ej: 50 30 70 20 40 60 80" onkeydown="if(event.key==='Enter')buildVisTree()">
+      <button class="btn btn-primary" onclick="buildVisTree()">Construir BST</button>
+    </div>
+    <div class="expr-help">Números separados por espacio → BST. También puedes cargar el árbol de la imagen de referencia.</div>
+    <div style="display:flex; gap:0.5rem; margin-top:0.7rem; flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="visLoadImage()">Árbol imagen (A…J)</button>
+      <button class="btn btn-ghost btn-sm" onclick="visLoadNum('50 30 70 20 40 60 80')">Ejemplo balanceado</button>
+      <button class="btn btn-ghost btn-sm" onclick="visLoadNum('4 19 -7 69 100 11 15 6')">Ejemplo BST imagen</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Leyenda de puntos</div>
+    <div class="trav-legend">
+      <div class="trav-legend-item"><span class="path-dot dot-pre"></span><span style="color:#6ee7b7">PRE-ORDEN</span> — punto izquierdo, al ENTRAR</div>
+      <div class="trav-legend-item"><span class="path-dot dot-in"></span><span style="color:#818cf8">IN-ORDEN</span> — punto inferior, ENTRE hijos</div>
+      <div class="trav-legend-item"><span class="path-dot dot-post"></span><span style="color:#fb923c">POST-ORDEN</span> — punto derecho, al SALIR</div>
+    </div>
+  </div>
+
+  <div class="card" id="visModePicker" style="display:none;">
+    <div class="card-title">Selecciona el recorrido a visualizar</div>
+    <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+      <button class="btn btn-sm" id="btnPre"  onclick="visModeSelect('pre')"
+        style="background:rgba(110,231,183,0.12);border:2px solid #6ee7b7;color:#6ee7b7;font-weight:700;flex:1;min-width:110px;">
+        🟢 PRE-ORDEN
+      </button>
+      <button class="btn btn-sm" id="btnIn"   onclick="visModeSelect('in')"
+        style="background:rgba(129,140,248,0.12);border:2px solid #818cf8;color:#818cf8;font-weight:700;flex:1;min-width:110px;">
+        🟣 IN-ORDEN
+      </button>
+      <button class="btn btn-sm" id="btnPost" onclick="visModeSelect('post')"
+        style="background:rgba(251,146,60,0.12);border:2px solid #fb923c;color:#fb923c;font-weight:700;flex:1;min-width:110px;">
+        🟠 POST-ORDEN
+      </button>
+    </div>
+  </div>
+
+  <div class="card" id="visAnimCard" style="display:none;">
+    <div class="card-title" id="visAnimTitle">Recorrido</div>
+    <div class="tree-wrap" id="visTree" style="min-height:280px;"></div>
+
+    <div style="margin-top:0.8rem; font-size:0.82rem; padding:0.6rem 0.9rem; border-radius:8px;
+      background:var(--surface2); border:1px solid var(--border);
+      font-family:'JetBrains Mono',monospace; min-height:2.5rem;" id="visCurrentExplain"> </div>
+
+    <div style="margin-top:0.8rem;">
+      <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:0.4rem;" id="visSeqLabel">Secuencia</div>
+      <div class="node-seq" id="visSeq"></div>
+    </div>
+
+    <div class="step-controls" style="margin-top:0.8rem;">
+      <button class="btn btn-ghost btn-sm" onclick="visPrev()">← Anterior</button>
+      <div class="step-label" id="visStepLabel">Paso 0</div>
+      <button class="btn btn-ghost btn-sm" onclick="visNext()">Siguiente →</button>
+      <button class="btn btn-primary btn-sm" onclick="visAuto()" id="visAutoBtn">▶ Auto</button>
+      <button class="btn btn-ghost btn-sm" onclick="visReset()">↺ Reiniciar</button>
+    </div>
+    <div class="msg info" id="visMsg" style="display:none; margin-top:0.8rem;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">¿Por qué funciona esta técnica?</div>
+    <div class="theory-block">El contorno del árbol es un camino único. Al recorrerlo, pasas por cada nodo exactamente <strong>3 veces</strong>. La diferencia entre PRE, IN y POST es solo <strong>cuándo decides anotar ese nodo</strong>.</div>
+    <div class="theory-block"><strong style="color:#6ee7b7">PRE:</strong> al tocar el punto izquierdo — primera vez que lo ves.</div>
+    <div class="theory-block"><strong style="color:#818cf8">IN:</strong> al tocar el punto inferior — después del hijo izquierdo, antes del derecho.</div>
+    <div class="theory-block"><strong style="color:#fb923c">POST:</strong> al tocar el punto derecho — lo abandonas definitivamente.</div>
+  </div>
+</section>
+
+<!-- ===== ELIMINACION ===== -->
+<section id="eliminacion">
+  <h2>Eliminación en BST</h2>
+  <p class="subtitle">Construye un árbol, selecciona un nodo y observa cómo se elimina según si es hoja, nodo con un hijo, o nodo con dos hijos.</p>
+
+  <div class="card">
+    <div class="card-title">Construir árbol</div>
+    <div class="row gap-sm">
+      <input type="text" id="delInput" placeholder="Ej: 50 30 70 20 40 60 80 10 25" onkeydown="if(event.key==='Enter')buildDelTree()">
+      <button class="btn btn-primary" onclick="buildDelTree()">Construir</button>
+    </div>
+    <div style="display:flex; gap:0.5rem; margin-top:0.7rem; flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="delExample('50 30 70 20 40 60 80 10 25 35')">Ejemplo rico</button>
+      <button class="btn btn-ghost btn-sm" onclick="delExample('4 19 -7 69 100 11 15 6')">Ejemplo imagen</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Árbol actual</div>
+    <div class="tree-wrap" id="delTree"></div>
+  </div>
+
+  <div class="card" id="delControlCard" style="display:none;">
+    <div class="card-title">Eliminar nodo</div>
+    <div class="row gap-sm">
+      <input type="text" id="delNodeInput" placeholder="Valor a eliminar">
+      <button class="btn btn-accent3" onclick="deleteNode()">Eliminar</button>
+    </div>
+    <div id="delStatus" class="del-status" style="display:none;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Reglas de eliminación en BST</div>
+    <div class="theory-block"><strong style="color:#6ee7b7">Caso 1 — Hoja (sin hijos):</strong> Se elimina directamente. El padre pierde esa referencia. Es el caso más simple.</div>
+    <div class="theory-block"><strong style="color:#fb923c">Caso 2 — Un hijo:</strong> El nodo se elimina y su único hijo sube a ocupar su lugar. El padre del eliminado ahora apunta al nieto.</div>
+    <div class="theory-block"><strong style="color:#f472b6">Caso 3 — Dos hijos (más complejo):</strong> Se busca el <strong>sucesor in-orden</strong> (el nodo más pequeño del subárbol derecho) o el predecesor in-orden (el más grande del izquierdo). Se copia su valor al nodo a eliminar, y luego se elimina ese sucesor (que tendrá 0 o 1 hijo).</div>
+    <div class="theory-block"><strong style="color:#f472b6">Caso 3b — Raíz con dos hijos:</strong> Igual que caso 3. La raíz toma el valor del sucesor in-orden y ese nodo sucesor es eliminado.</div>
+  </div>
+</section>
+
+</body>
+</html>
